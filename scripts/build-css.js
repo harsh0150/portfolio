@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const tn = require('C:/Users/harsh/Desktop/portfolio/node_modules/@tailwindcss/node/dist/index.js');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+const tn = require('@tailwindcss/node');
 
 async function buildCss() {
   const inputCss = `@import "tailwindcss";
@@ -47,9 +47,11 @@ body {
 }
 `;
 
+  const rootDir = path.resolve(__dirname, '..');
+
   const compiler = await tn.compile(inputCss, {
-    base: path.resolve(__dirname, '..'),
-    from: path.resolve(__dirname, '../app/globals.css'),
+    base: rootDir,
+    from: path.resolve(rootDir, 'app/globals.css'),
     onDependency: () => {}
   });
 
@@ -69,7 +71,7 @@ body {
 
   const contents = filesToScan
     .map(f => {
-      const fullPath = path.resolve(__dirname, '..', f);
+      const fullPath = path.resolve(rootDir, f);
       return fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf8') : '';
     })
     .join('\n');
@@ -78,7 +80,7 @@ body {
   const uniqueWords = Array.from(new Set(words));
 
   const compiledCss = compiler.build(uniqueWords);
-  const outPath = path.resolve(__dirname, '../app/globals.css');
+  const outPath = path.resolve(rootDir, 'app/globals.css');
   fs.writeFileSync(outPath, compiledCss, 'utf8');
   console.log(`[build-css] Compiled ${uniqueWords.length} tokens into ${outPath} (${compiledCss.length} bytes)`);
 }
